@@ -46,11 +46,28 @@ import androidx.lifecycle.ViewModel
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.input.pointer.pointerInput
+import android.content.Intent
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.sp
+import android.os.Build
+import android.Manifest
+import android.content.pm.PackageManager
+import kotlin.random.Random
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.unit.Dp
+import androidx.compose.foundation.layout.BoxWithConstraints
 
 class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Request notification permission for Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
+            }
+        }
         enableEdgeToEdge()
         setContent {
             ChromaToneTheme {
@@ -71,6 +88,10 @@ fun MainScreen(viewModel: MainViewModel, modifier: Modifier = Modifier) {
     val remainingSeconds by viewModel.remainingSeconds.observeAsState(null)
     var showVolume by remember { mutableStateOf(false) }
     var showTimer by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        viewModel.setAppContext(context)
+    }
 
     // Helper to get next/previous noise type
     fun nextNoiseType(current: NoiseType): NoiseType {
@@ -82,11 +103,156 @@ fun MainScreen(viewModel: MainViewModel, modifier: Modifier = Modifier) {
         return values[(current.ordinal - 1 + values.size) % values.size]
     }
 
-    Box(
+    BoxWithConstraints(
         modifier = modifier
             .background(Color.White)
             .fillMaxSize()
     ) {
+        // Subtle, fun emoji background for White Noise
+        if (selectedNoise == NoiseType.White) {
+            val emojis = listOf("\uD83D\uDCBB", "\u2615️", "\uD83D\uDCD6", "\uD83D\uDCDA") // laptop, coffee, book, books
+            val positionsAndRotations = remember(selectedNoise) {
+                List(emojis.size) {
+                    Triple(Random.nextFloat(), Random.nextFloat(), Random.nextFloat() * 360f)
+                }
+            }
+            val boxWidth = maxWidth
+            val boxHeight = maxHeight
+            emojis.forEachIndexed { i, emoji ->
+                val (xFrac, yFrac, rotation) = positionsAndRotations[i]
+                Text(
+                    text = emoji,
+                    fontSize = 64.sp,
+                    color = Color.LightGray.copy(alpha = 0.32f),
+                    modifier = Modifier
+                        .offset(
+                            x = (xFrac * (boxWidth.value - 64)).dp,
+                            y = (yFrac * (boxHeight.value - 64)).dp
+                        )
+                        .rotate(rotation)
+                )
+            }
+        }
+        if (selectedNoise == NoiseType.Pink) {
+            val emojis = listOf("\uD83C\uDF38", "\uD83C\uDFB6", "\u2728", "\uD83C\uDF3A") // flower, music, sparkle, rose
+            val positionsAndRotations = remember(selectedNoise) {
+                List(emojis.size) {
+                    Triple(Random.nextFloat(), Random.nextFloat(), Random.nextFloat() * 360f)
+                }
+            }
+            val boxWidth = maxWidth
+            val boxHeight = maxHeight
+            emojis.forEachIndexed { i, emoji ->
+                val (xFrac, yFrac, rotation) = positionsAndRotations[i]
+                Text(
+                    text = emoji,
+                    fontSize = 64.sp,
+                    color = Color(0xFFFFC1E3).copy(alpha = 0.28f),
+                    modifier = Modifier
+                        .offset(
+                            x = (xFrac * (boxWidth.value - 64)).dp,
+                            y = (yFrac * (boxHeight.value - 64)).dp
+                        )
+                        .rotate(rotation)
+                )
+            }
+        }
+        if (selectedNoise == NoiseType.Brown) {
+            val emojis = listOf("\uD83C\uDF33", "\uD83C\uDF34", "\uD83C\uDF32", "\u26F0️") // tree, palm, evergreen, mountain
+            val positionsAndRotations = remember(selectedNoise) {
+                List(emojis.size) {
+                    Triple(Random.nextFloat(), Random.nextFloat(), Random.nextFloat() * 360f)
+                }
+            }
+            val boxWidth = maxWidth
+            val boxHeight = maxHeight
+            emojis.forEachIndexed { i, emoji ->
+                val (xFrac, yFrac, rotation) = positionsAndRotations[i]
+                Text(
+                    text = emoji,
+                    fontSize = 64.sp,
+                    color = Color(0xFFD7CCC8).copy(alpha = 0.28f),
+                    modifier = Modifier
+                        .offset(
+                            x = (xFrac * (boxWidth.value - 64)).dp,
+                            y = (yFrac * (boxHeight.value - 64)).dp
+                        )
+                        .rotate(rotation)
+                )
+            }
+        }
+        if (selectedNoise == NoiseType.Green) {
+            val emojis = listOf("\uD83C\uDF3F", "\uD83C\uDF31", "\uD83C\uDF3E", "\uD83C\uDF40") // herb, seedling, ear of rice, four leaf clover
+            val positionsAndRotations = remember(selectedNoise) {
+                List(emojis.size) {
+                    Triple(Random.nextFloat(), Random.nextFloat(), Random.nextFloat() * 360f)
+                }
+            }
+            val boxWidth = maxWidth
+            val boxHeight = maxHeight
+            emojis.forEachIndexed { i, emoji ->
+                val (xFrac, yFrac, rotation) = positionsAndRotations[i]
+                Text(
+                    text = emoji,
+                    fontSize = 64.sp,
+                    color = Color(0xFFC8E6C9).copy(alpha = 0.28f),
+                    modifier = Modifier
+                        .offset(
+                            x = (xFrac * (boxWidth.value - 64)).dp,
+                            y = (yFrac * (boxHeight.value - 64)).dp
+                        )
+                        .rotate(rotation)
+                )
+            }
+        }
+        if (selectedNoise == NoiseType.Blue) {
+            val emojis = listOf("\uD83C\uDF0A", "\uD83D\uDCA7", "\u2601️", "\uD83C\uDF27️") // wave, droplet, cloud, rain
+            val positionsAndRotations = remember(selectedNoise) {
+                List(emojis.size) {
+                    Triple(Random.nextFloat(), Random.nextFloat(), Random.nextFloat() * 360f)
+                }
+            }
+            val boxWidth = maxWidth
+            val boxHeight = maxHeight
+            emojis.forEachIndexed { i, emoji ->
+                val (xFrac, yFrac, rotation) = positionsAndRotations[i]
+                Text(
+                    text = emoji,
+                    fontSize = 64.sp,
+                    color = Color(0xFFBBDEFB).copy(alpha = 0.28f),
+                    modifier = Modifier
+                        .offset(
+                            x = (xFrac * (boxWidth.value - 64)).dp,
+                            y = (yFrac * (boxHeight.value - 64)).dp
+                        )
+                        .rotate(rotation)
+                )
+            }
+        }
+        if (selectedNoise == NoiseType.Violet) {
+            val emojis = listOf("\uD83C\uDF19", "\u2728", "\u2B50", "\uD83C\uDF20") // moon, sparkle, star, shooting star
+            val positionsAndRotations = remember(selectedNoise) {
+                List(emojis.size) {
+                    Triple(Random.nextFloat(), Random.nextFloat(), Random.nextFloat() * 360f)
+                }
+            }
+            val boxWidth = maxWidth
+            val boxHeight = maxHeight
+            emojis.forEachIndexed { i, emoji ->
+                val (xFrac, yFrac, rotation) = positionsAndRotations[i]
+                Text(
+                    text = emoji,
+                    fontSize = 64.sp,
+                    color = Color(0xFFE1BEE7).copy(alpha = 0.28f),
+                    modifier = Modifier
+                        .offset(
+                            x = (xFrac * (boxWidth.value - 64)).dp,
+                            y = (yFrac * (boxHeight.value - 64)).dp
+                        )
+                        .rotate(rotation)
+                )
+            }
+        }
         // Top left: Timer button
         IconButton(
             onClick = { showTimer = true },
@@ -359,7 +525,6 @@ enum class NoiseType(val displayName: String) {
 class MainViewModel : ViewModel() {
     private val _selectedNoise = MutableLiveData(NoiseType.White)
     val selectedNoise: LiveData<NoiseType> = _selectedNoise
-    private var noisePlayer: NoisePlayer? = null
     private val _isPlaying = MutableLiveData(false)
     val isPlaying: LiveData<Boolean> = _isPlaying
     private val _volume = MutableLiveData(0.7f)
@@ -369,11 +534,15 @@ class MainViewModel : ViewModel() {
     private val _remainingSeconds = MutableLiveData<Int?>(null)
     val remainingSeconds: LiveData<Int?> = _remainingSeconds
     private var timerJob: Job? = null
+    private var appContext: Context? = null
+
+    fun setAppContext(context: Context) {
+        appContext = context.applicationContext
+    }
 
     fun selectNoise(type: NoiseType) {
         _selectedNoise.value = type
         if (_isPlaying.value == true) {
-            stopNoise()
             playNoise()
         }
     }
@@ -381,7 +550,6 @@ class MainViewModel : ViewModel() {
     fun setVolume(vol: Float) {
         _volume.value = vol
         if (_isPlaying.value == true) {
-            stopNoise()
             playNoise()
         }
     }
@@ -414,21 +582,26 @@ class MainViewModel : ViewModel() {
     }
 
     fun playNoise() {
+        val context = appContext ?: return
         val type = _selectedNoise.value ?: NoiseType.White
         val vol = _volume.value ?: 0.7f
-        noisePlayer = NoisePlayer(
-            bufferProvider = { bufferSize -> NoiseGenerator.getNoiseBuffer(type, bufferSize) },
-            volume = vol
-        )
-        noisePlayer?.start()
+        val intent = Intent(context, NoiseForegroundService::class.java).apply {
+            putExtra(NoiseForegroundService.EXTRA_NOISE_TYPE, type.name)
+            putExtra(NoiseForegroundService.EXTRA_VOLUME, vol)
+            action = NoiseForegroundService.ACTION_PLAY
+        }
+        context.startService(intent)
         _isPlaying.value = true
         if (_timerMinutes.value != null) {
             startTimer()
         }
     }
     fun stopNoise() {
-        noisePlayer?.stop()
-        noisePlayer = null
+        val context = appContext ?: return
+        val intent = Intent(context, NoiseForegroundService::class.java).apply {
+            action = NoiseForegroundService.ACTION_STOP
+        }
+        context.startService(intent)
         _isPlaying.value = false
     }
     fun toggleNoise() {
@@ -436,7 +609,7 @@ class MainViewModel : ViewModel() {
     }
     override fun onCleared() {
         super.onCleared()
-        noisePlayer?.stop()
+        stopNoise()
         timerJob?.cancel()
     }
 }
