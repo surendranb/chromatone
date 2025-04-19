@@ -4,56 +4,48 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.fuseforge.chromatone.ui.theme.ChromaToneTheme
 import androidx.activity.viewModels
-import androidx.lifecycle.ViewModel
-import androidx.compose.runtime.getValue
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.fuseforge.chromatone.audio.NoiseGenerator
+import com.fuseforge.chromatone.audio.NoisePlayer
+import com.fuseforge.chromatone.ui.theme.ChromaToneTheme
+import kotlinx.coroutines.*
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.fuseforge.chromatone.audio.NoisePlayer
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.background
-import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.Alignment
-import com.fuseforge.chromatone.audio.NoiseGenerator
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.OutlinedTextField
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.lifecycle.ViewModel
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.input.pointer.pointerInput
 
 class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels()
@@ -77,54 +69,208 @@ fun MainScreen(viewModel: MainViewModel, modifier: Modifier = Modifier) {
     val volume by viewModel.volume.observeAsState(0.7f)
     val timerMinutes by viewModel.timerMinutes.observeAsState(null)
     val remainingSeconds by viewModel.remainingSeconds.observeAsState(null)
-    Column(modifier = modifier) {
-        Text(
-            text = "Selected Noise: ${selectedNoise.displayName}",
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-        NoiseTypeSelector(selected = selectedNoise, onSelect = { viewModel.selectNoise(it) })
-        VolumeSlider(volume = volume, onVolumeChange = { viewModel.setVolume(it) })
-        TimerDropdown(timerMinutes = timerMinutes, onTimerChange = { viewModel.setTimer(it) })
-        if (timerMinutes != null && remainingSeconds != null) {
+    var showVolume by remember { mutableStateOf(false) }
+    var showTimer by remember { mutableStateOf(false) }
+
+    // Helper to get next/previous noise type
+    fun nextNoiseType(current: NoiseType): NoiseType {
+        val values = NoiseType.values()
+        return values[(current.ordinal + 1) % values.size]
+    }
+    fun prevNoiseType(current: NoiseType): NoiseType {
+        val values = NoiseType.values()
+        return values[(current.ordinal - 1 + values.size) % values.size]
+    }
+
+    Box(
+        modifier = modifier
+            .background(Color.White)
+            .fillMaxSize()
+    ) {
+        // Top left: Timer button
+        IconButton(
+            onClick = { showTimer = true },
+            modifier = Modifier.align(Alignment.TopStart).padding(16.dp)
+        ) {
+            Icon(Icons.Filled.AccessTime, contentDescription = "Timer", tint = Color.Black)
+        }
+        // Top right: Volume button
+        IconButton(
+            onClick = { showVolume = true },
+            modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)
+        ) {
+            Icon(Icons.Filled.VolumeUp, contentDescription = "Volume", tint = Color.Black)
+        }
+        // Center: Large colored circle with left/right arrows, then text, then buttons
+        Column(
+            modifier = Modifier.align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                IconButton(onClick = { viewModel.selectNoise(prevNoiseType(selectedNoise)) }) {
+                    Icon(Icons.Filled.ArrowBack, contentDescription = "Previous", tint = Color.Black)
+                }
+                Box(
+                    modifier = Modifier
+                        .size(220.dp)
+                        .clip(CircleShape)
+                        .background(selectedNoise.color)
+                        .clickable { viewModel.selectNoise(nextNoiseType(selectedNoise)) }
+                )
+                IconButton(onClick = { viewModel.selectNoise(nextNoiseType(selectedNoise)) }) {
+                    Icon(Icons.Filled.ArrowForward, contentDescription = "Next", tint = Color.Black)
+                }
+            }
+            Spacer(modifier = Modifier.height(32.dp))
+            Text(
+                text = selectedNoise.displayName,
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color.Black
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                IconButton(onClick = { viewModel.toggleNoise() }) {
+                    if (isPlaying) {
+                        Icon(Icons.Filled.Pause, contentDescription = "Pause", tint = Color.Black, modifier = Modifier.size(48.dp))
+                    } else {
+                        Icon(Icons.Filled.PlayArrow, contentDescription = "Play", tint = Color.Black, modifier = Modifier.size(48.dp))
+                    }
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                IconButton(onClick = { viewModel.stopNoise() }) {
+                    Icon(Icons.Filled.Stop, contentDescription = "Stop", tint = Color.Black, modifier = Modifier.size(48.dp))
+                }
+            }
+        }
+        // Timer overlay
+        if (showTimer) {
+            Dialog(onDismissRequest = { showTimer = false }) {
+                Surface(shape = MaterialTheme.shapes.medium, color = Color.White) {
+                    Column(modifier = Modifier.padding(24.dp)) {
+                        Text("Set Timer (minutes)", color = Color.Black, style = MaterialTheme.typography.bodyLarge)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        var sliderValue by remember { mutableStateOf((timerMinutes ?: 0) / 15f) }
+                        Slider(
+                            value = sliderValue,
+                            onValueChange = {
+                                sliderValue = it
+                                viewModel.setTimer((it * 15).toInt().coerceAtMost(480))
+                            },
+                            valueRange = 0f..32f,
+                            steps = 31,
+                            modifier = Modifier.width(240.dp)
+                        )
+                        Text(
+                            text = if ((sliderValue * 15).toInt() == 0) "No Timer" else "${(sliderValue * 15).toInt()} min",
+                            color = Color.Black,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(onClick = { showTimer = false }) {
+                            Text("Done")
+                        }
+                    }
+                }
+            }
+        }
+        // Volume overlay
+        if (showVolume) {
+            Dialog(onDismissRequest = { showVolume = false }) {
+                Surface(shape = MaterialTheme.shapes.medium, color = Color.White) {
+                    Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Volume", color = Color.Black, style = MaterialTheme.typography.bodyLarge)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        var sliderValue by remember { mutableStateOf(volume) }
+                        Slider(
+                            value = sliderValue,
+                            onValueChange = { v ->
+                                sliderValue = v
+                                viewModel.setVolume(v)
+                            },
+                            valueRange = 0f..1f,
+                            modifier = Modifier.height(180.dp)
+                        )
+                        Text(
+                            text = "${(sliderValue * 100).toInt()}%",
+                            color = Color.Black,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(onClick = { showVolume = false }) {
+                            Text("Done")
+                        }
+                    }
+                }
+            }
+        }
+        // Timer countdown (if active)
+        if (timerMinutes != null && remainingSeconds != null && (remainingSeconds ?: 0) > 0) {
             val min = (remainingSeconds ?: 0) / 60
             val sec = (remainingSeconds ?: 0) % 60
             Text(
                 text = "Time left: %02d:%02d".format(min, sec),
-                modifier = Modifier.padding(bottom = 8.dp)
+                color = Color.Black,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 32.dp)
             )
-        }
-        IconButton(onClick = { viewModel.toggleNoise() }) {
-            if (isPlaying) {
-                Icon(Icons.Filled.Pause, contentDescription = "Pause")
-            } else {
-                Icon(Icons.Filled.PlayArrow, contentDescription = "Play")
-            }
         }
     }
 }
 
+// Assign a distinct color to each noise type
+val NoiseType.color: Color
+    get() = when (this) {
+        NoiseType.White -> Color(0xFFF5F5F5)
+        NoiseType.Pink -> Color(0xFFFFC1E3)
+        NoiseType.Brown -> Color(0xFFD7CCC8)
+        NoiseType.Green -> Color(0xFFC8E6C9)
+        NoiseType.Blue -> Color(0xFFBBDEFB)
+        NoiseType.Violet -> Color(0xFFE1BEE7)
+    }
+
 @Composable
-fun NoiseTypeSelector(selected: NoiseType, onSelect: (NoiseType) -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+fun NoiseTypeCarousel(selected: NoiseType, onSelect: (NoiseType) -> Unit) {
+    val noiseTypes = NoiseType.values().toList()
+    LazyRow(
         modifier = Modifier
-            .padding(bottom = 16.dp)
-            .horizontalScroll(rememberScrollState())
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
-        NoiseType.values().forEach { type ->
+        items(noiseTypes) { type ->
             val isSelected = type == selected
-            Text(
-                text = type.displayName,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                    .background(
-                        color = if (isSelected) Color(0xFF90CAF9) else Color.LightGray,
-                        shape = RoundedCornerShape(16.dp)
-                    )
-                    .clickable { onSelect(type) }
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-                color = if (isSelected) Color.Black else Color.DarkGray
+            val cardColor by animateColorAsState(
+                if (isSelected) type.color else Color.White,
+                animationSpec = tween(durationMillis = 400), label = "cardColor"
             )
+            Card(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .scale(if (isSelected) 1.1f else 1f)
+                    .shadow(if (isSelected) 12.dp else 2.dp)
+                    .clickable(onClick = { onSelect(type) }),
+                colors = CardDefaults.cardColors(containerColor = cardColor),
+                elevation = CardDefaults.cardElevation(if (isSelected) 12.dp else 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp, vertical = 20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = type.displayName,
+                        color = if (isSelected) Color.Black else Color.DarkGray,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
         }
     }
 }
