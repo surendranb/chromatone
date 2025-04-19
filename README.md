@@ -15,8 +15,8 @@ Colorful ambient noise for focus, sleep, and relaxation. Lightweight, private, a
 ## Screenshots
 Add your screenshots here! Example:
 
-![White Noise](docs/white_noise.png)
-![Pink Noise](docs/pink_noise.png)
+![White Noise](docs/white_noise.jpg)
+![Pink Noise](docs/pink_noise.jpg)
 
 ## Build & Run
 1. Clone this repository:
