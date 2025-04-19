@@ -101,11 +101,17 @@ fun MainScreen(viewModel: MainViewModel, modifier: Modifier = Modifier) {
         ) {
             Icon(Icons.Filled.VolumeUp, contentDescription = "Volume", tint = Color.Black)
         }
-        // Center: Large colored circle with left/right arrows, then text, then buttons
+        // Center: Text, then large colored circle with left/right arrows, then buttons
         Column(
             modifier = Modifier.align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Text(
+                text = selectedNoise.displayName,
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color.Black
+            )
+            Spacer(modifier = Modifier.height(32.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
@@ -124,12 +130,6 @@ fun MainScreen(viewModel: MainViewModel, modifier: Modifier = Modifier) {
                     Icon(Icons.Filled.ArrowForward, contentDescription = "Next", tint = Color.Black)
                 }
             }
-            Spacer(modifier = Modifier.height(32.dp))
-            Text(
-                text = selectedNoise.displayName,
-                style = MaterialTheme.typography.headlineMedium,
-                color = Color.Black
-            )
             Spacer(modifier = Modifier.height(24.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -153,7 +153,7 @@ fun MainScreen(viewModel: MainViewModel, modifier: Modifier = Modifier) {
             Dialog(onDismissRequest = { showTimer = false }) {
                 Surface(shape = MaterialTheme.shapes.medium, color = Color.White) {
                     Column(modifier = Modifier.padding(24.dp)) {
-                        Text("Set Timer (minutes)", color = Color.Black, style = MaterialTheme.typography.bodyLarge)
+                        Text("Set Timer", color = Color.Black, style = MaterialTheme.typography.bodyLarge)
                         Spacer(modifier = Modifier.height(16.dp))
                         var sliderValue by remember { mutableStateOf((timerMinutes ?: 0) / 15f) }
                         Slider(
@@ -166,8 +166,17 @@ fun MainScreen(viewModel: MainViewModel, modifier: Modifier = Modifier) {
                             steps = 31,
                             modifier = Modifier.width(240.dp)
                         )
+                        val totalMinutes = (sliderValue * 15).toInt().coerceAtMost(480)
+                        val hours = totalMinutes / 60
+                        val minutes = totalMinutes % 60
+                        val timeLabel = when {
+                            totalMinutes == 0 -> "No Timer"
+                            hours > 0 && minutes > 0 -> "${hours} hr ${minutes} min"
+                            hours > 0 -> "${hours} hr"
+                            else -> "${minutes} min"
+                        }
                         Text(
-                            text = if ((sliderValue * 15).toInt() == 0) "No Timer" else "${(sliderValue * 15).toInt()} min",
+                            text = timeLabel,
                             color = Color.Black,
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.align(Alignment.CenterHorizontally)
