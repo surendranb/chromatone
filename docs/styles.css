@@ -1,0 +1,199 @@
+:root {
+    --bg-light: #F5F5F5;
+    --bg-dark: #121212;
+    --surface-light: #FFFFFF;
+    --surface-dark: #1E1E1E;
+    --text-light: #121212;
+    --text-dark: #F5F5F5;
+    --primary: #6200EE;
+    
+    /* Classic Noise Colors */
+    --color-white: #F5F5F5;
+    --color-pink: #FFC1E3;
+    --color-brown: #D7CCC8;
+    --color-green: #C8E6C9;
+    --color-blue: #BBDEFB;
+    --color-violet: #E1BEE7;
+    --color-grey: #ECEFF1;
+    --color-azure: #E3F2FD;
+    --color-red: #FFEBEE;
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        --bg: var(--bg-dark);
+        --surface: var(--surface-dark);
+        --text: var(--text-dark);
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    body {
+        --bg: var(--bg-light);
+        --surface: var(--surface-light);
+        --text: var(--text-light);
+    }
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, sans-serif;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+}
+
+.zen-container {
+    width: 100%;
+    max-width: 900px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 1vh 2vw; /* Use Viewport units for padding */
+}
+
+/* Top Bar: Title + Download */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    height: 10vh; /* Fixed % of viewport height */
+    min-height: 50px;
+    max-height: 80px;
+}
+
+.logo {
+    font-size: min(1.8rem, 5vh);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.btn-download {
+    background: var(--primary);
+    color: white;
+    padding: 1vh 3vw;
+    border-radius: 40px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+/* Main Grid: Fluid centering */
+.content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0; /* Critical for flex shrinking */
+    padding: 1vh 0;
+}
+
+.noise-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 1.5vh;
+    width: 100%;
+    height: 100%;
+    max-height: 60vh; /* Don't let the grid exceed this portion of the screen */
+}
+
+.noise-item {
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.1);
+    transition: transform 0.1s, border 0.1s;
+    background-clip: padding-box;
+}
+
+.noise-item:active { transform: scale(0.96); }
+.noise-item.selected { border: 4px solid var(--primary); }
+
+.noise-item span { 
+    font-weight: 700; 
+    font-size: clamp(0.7rem, 2vh, 1rem); 
+    color: #121212; 
+    opacity: 0.8;
+}
+
+/* Bottom Bar: Controls centered */
+.bottom-bar {
+    flex-shrink: 0;
+    height: 25vh;
+    min-height: 120px;
+    max-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2vh;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 5vw;
+    width: 100%;
+    justify-content: center;
+}
+
+.play-button {
+    width: min(72px, 12vh);
+    height: min(72px, 12vh);
+    border-radius: 50%;
+    border: 2px solid var(--text);
+    background: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.play-button svg { width: 50%; height: 50%; fill: var(--text); }
+
+.timer-section {
+    width: 100%;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5vh;
+}
+
+#timer-slider { width: 100%; cursor: pointer; }
+.timer-display { font-size: 0.9rem; opacity: 0.5; font-family: monospace; text-align: center; }
+
+.credits { font-size: 0.75rem; opacity: 0.3; text-align: center; }
+.credits a { color: inherit; text-decoration: none; font-weight: 600; }
+
+/* Colors */
+.noise-item[data-noise="White"] { background-color: var(--color-white); }
+.noise-item[data-noise="Pink"] { background-color: var(--color-pink); }
+.noise-item[data-noise="Brown"] { background-color: var(--color-brown); }
+.noise-item[data-noise="Green"] { background-color: var(--color-green); }
+.noise-item[data-noise="Blue"] { background-color: var(--color-blue); }
+.noise-item[data-noise="Violet"] { background-color: var(--color-violet); }
+.noise-item[data-noise="Grey"] { background-color: var(--color-grey); }
+.noise-item[data-noise="Azure"] { background-color: var(--color-azure); }
+.noise-item[data-noise="Red"] { background-color: var(--color-red); }
+
+/* Mobile Optimizations */
+@media (max-width: 600px) {
+    .logo { visibility: hidden; width: 0; } /* Hide logo on mobile to make room for Download */
+    .top-bar { justify-content: flex-end; }
+    .noise-item span { font-size: 0.7rem; }
+}
