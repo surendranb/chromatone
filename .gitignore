@@ -1,0 +1,45 @@
+# Ignore IDE, build, and OS-specific files
+# Internal Release Docs
+RELEASE_CHECKLIST.md
+docs/RELEASE_CHECKLIST.md
+*.png_fixed
+*.png_audit
+*.iml
+.gradle
+/local.properties
+/.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Ignore Play Store and privacy docs
+PLAY_STORE_LISTING.md
+PRIVACY_POLICY.md
+
+# Ignore design and development principles docs
+DESIGN_PRINCIPLES.md
+DEVELOPMENT_PRINCIPLES.md
+
+# Ignore app build outputs
+app/build/
+app/debug/
+app/release/
+
+# Ignore app-specific IDE files
+app/.DS_Store
+app/.gitignore
+
+# Ignore generated files
+**/build/
+**/.DS_Store
+
+# Ignore gradle wrapper logs
+.gradle/
+
+# Ignore docs cache or temp files
+/docs/*.tmp
+/docs/*.bak
+CHROME_TONE_PROJECT_TRACKER.md

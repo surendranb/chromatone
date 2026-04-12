@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ChromaTone | Pure Focus</title>
+    <meta name="description" content="Minimal, privacy-first ambient noise. No ads, no tracking.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="zen-container">
+        <header class="top-bar">
+            <h1 class="logo">ChromaTone</h1>
+            <div class="social-links">
+                <a class="github-button" href="https://github.com/surendranb/chromatone" data-icon="octicon-star" data-show-count="true" aria-label="Star surendranb/chromatone on GitHub">Star</a>
+                <a class="github-button" href="https://github.com/surendranb/chromatone/fork" data-icon="octicon-repo-forked" data-show-count="true" aria-label="Fork surendranb/chromatone on GitHub">Fork</a>
+                <a href="https://github.com/surendranb/chromatone/releases" class="btn-download">Download App</a>
+            </div>
+        </header>
+
+        <main class="content">
+            <section class="noise-grid">
+                <div class="noise-item selected" data-noise="White"><span>FOCUS</span></div>
+                <div class="noise-item" data-noise="Pink"><span>RELAX</span></div>
+                <div class="noise-item" data-noise="Brown"><span>SLEEP</span></div>
+                <div class="noise-item" data-noise="Blue"><span>REST</span></div>
+                <div class="noise-item" data-noise="Green"><span>CREATE</span></div>
+                <div class="noise-item" data-noise="Violet"><span>STUDY</span></div>
+                <div class="noise-item" data-noise="Grey"><span>CALM</span></div>
+                <div class="noise-item" data-noise="Azure"><span>BRIGHT</span></div>
+                <div class="noise-item" data-noise="Red"><span>HEAVY</span></div>
+            </section>
+        </main>
+
+        <footer class="bottom-bar">
+            <div class="controls">
+                <button class="play-button" id="play-btn" aria-label="Play/Pause">
+                    <svg viewBox="0 0 24 24" id="play-icon"><path d="M8 5v14l11-7z"/></svg>
+                    <svg viewBox="0 0 24 24" id="pause-icon" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+                <div class="timer-section">
+                    <input type="range" id="timer-slider" min="0" max="32" value="0" step="1">
+                    <div class="timer-display" id="timer-label">∞</div>
+                </div>
+            </div>
+            <div class="credits">
+                <p>ChromaTone is a minimal, privacy-first ambient noise app for Android. No ads, no tracking, no network required—just pure focus, sleep, and relaxation sounds generated on your device.</p>
+                Built by <a href="https://surendranb.com">Surendran</a> | <a href="https://github.com/surendranb/chromatone">MIT License</a>
+            </div>
+        </footer>
+    </div>
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
